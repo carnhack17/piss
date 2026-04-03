@@ -1,0 +1,173 @@
+/* ========================= */
+/* RESET GLOBAL */
+/* ========================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  font-family: system-ui, sans-serif;
+}
+
+/* ========================= */
+/* SPLIT SCREEN ACCUEIL */
+/* ========================= */
+.split-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.split-item {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+
+  /* avant : background-repeat: no-repeat; */
+}
+
+.split-item span {
+  position: relative;
+  z-index: 2;
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.7);
+}
+
+/* overlay sombre */
+.split-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+}
+
+/* mobile */
+@media (max-width: 768px) {
+  .split-container {
+    flex-direction: column;
+  }
+}
+
+/* ========================= */
+/* MODE CONTAINER FULL SCREEN */
+/* ========================= */
+.mode-container {
+  min-height: 100vh;
+  width: 100vw;
+
+  background-size: cover;     /* avant : contain */
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  /* ajouté pour éviter le noir en bas */
+  overflow-y: auto;
+}
+
+/* ========================= */
+/* FORMULAIRE / HABITS FORM */
+/* ========================= */
+.form-container {
+  width: 90%;
+  max-width: 400px;
+  background: rgba(0,0,0,0.65);
+  padding: 20px;
+  border-radius: 15px;
+  color: white;
+
+  /* avant : rien pour centrer verticalement */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* inputs */
+.form-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: none;
+}
+
+/* criteria */
+.criteria-group {
+  margin-top: 15px;
+}
+
+.criteria-group label {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-radius: 10px;
+  background: #ddd;
+  color: black;
+  cursor: pointer;
+}
+
+.options-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.option-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background-color: #22c55e;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.option-btn.active {
+  background-color: #16a34a;
+  color: white;
+}
+
+.option-btn:hover {
+  background-color: #16a34a;
+}
+
+/* bouton submit */
+.form-container > button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background-color: #22c55e;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #22c55e;
+  color: black;
+  padding: 12px 18px;
+  border-radius: 10px;
+  z-index: 10;
+}

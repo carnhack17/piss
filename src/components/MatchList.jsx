@@ -3,12 +3,12 @@ import TinderCard from "react-tinder-card";
 import { supabase } from "../supabaseClient"; // ton client Supabase
 
 function MatchList({ user }) {
-  const [posts, setPosts] = useState([]);
+  const [post, setPost] = useState([]);
   const [index, setIndex] = useState(0);
 
   // 🔍 Récupère les annonces de la base
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchPost = async () => {
       const { data, error } = await supabase
         .from("post")
         .select("*")
@@ -17,10 +17,10 @@ function MatchList({ user }) {
         console.log("Erreur Supabase:", error);
         return;
       }
-      setPosts(data);
+      setPost(data);
     };
 
-    fetchPosts();
+    fetchPost();
   }, []);
 
   // 🔍 FILTRE LOCAL

@@ -6,7 +6,7 @@ import MatchList from "./components/MatchList";
 import proposerImg from "./components/images/proposer.jpg";
 import chercherImg from "./components/images/chercher.jpg";
 
-function App({ posts }) {
+function App({ post }) {
   const [mode, setMode] = useState(null);
   const [user, setUser] = useState(null);
 
@@ -74,7 +74,7 @@ function App({ posts }) {
           className="mode-container"
           style={{ backgroundImage: `url(${chercherImg})` }}
         >
-          <MatchList posts={posts} user={user} />
+          <MatchList post={post} user={user} />
         </div>
       )}
     </div>

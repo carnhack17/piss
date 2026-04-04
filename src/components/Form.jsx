@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
+import { v4 as uuidv4 } from "uuid"; // Pour le token unique
 
 function Form({ onSubmit }) {
   const [name, setName] = useState("");
@@ -38,11 +39,14 @@ function Form({ onSubmit }) {
     }
     for (let key in habits) if (!habits[key]) return alert(`Choisis "${key}" !`);
 
-    // 🔥 Insertion Supabase
+    // 🔥 Génération du token de suppression
+    const deleteToken = uuidv4();
+
+    // 🔥 Insertion Supabase avec delete_token
     const { data, error } = await supabase
       .from("post")
       .insert([
-        { name, phone, city, quartier, budget: Number(budget), habits },
+        { name, phone, city, quartier, budget: Number(budget), habits, delete_token: deleteToken },
       ]);
 
     if (error) {
@@ -50,6 +54,15 @@ function Form({ onSubmit }) {
       alert("Erreur lors de l'enregistrement !");
       return;
     }
+
+    // 🔥 Génération du lien de suppression
+    const deleteLink = `https://ton-app.vercel.app/delete/${deleteToken}`;
+
+    // 🔥 Envoi du lien via WhatsApp
+    const waUrl = `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+      "Merci pour ta publication ! Pour supprimer ton annonce, clique ici : " + deleteLink
+    )}`;
+    window.open(waUrl, "_blank");
 
     setToast("✅ Publication réussie !");
     setTimeout(() => setToast(""), 3000);
@@ -67,15 +80,23 @@ function Form({ onSubmit }) {
 
   const renderOptionGroup = (label, field, options) => (
     <div className="criteria-group">
-      <label onClick={() => toggleCriteria(field)} className={openCriteria[field] ? "open" : ""}>
+      <label
+        onClick={() => toggleCriteria(field)}
+        className={openCriteria[field] ? "open" : ""}
+      >
         {label} <span className="arrow">▼</span>
       </label>
-      <div className="options-row" style={{ display: openCriteria[field] ? "flex" : "none" }}>
+      <div
+        className="options-row"
+        style={{ display: openCriteria[field] ? "flex" : "none" }}
+      >
         {options.map((opt) => (
           <button
             type="button"
             key={opt}
-            className={`option-btn ${habits[field] === opt.toLowerCase() ? "active" : ""}`}
+            className={`option-btn ${
+              habits[field] === opt.toLowerCase() ? "active" : ""
+            }`}
             onClick={() => setHabits({ ...habits, [field]: opt.toLowerCase() })}
           >
             {opt}

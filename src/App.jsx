@@ -19,6 +19,21 @@ function App({ post }) {
     setUser(formData);
   };
 
+  // 🔹 Style commun pour les boutons Retour
+  const backBtnStyle = {
+    position: "absolute",
+    top: "10px",
+    left: "10px",
+    zIndex: 10,
+    backgroundColor: "#f0f0f0",
+    color: "#333",
+    padding: "10px 16px",
+    borderRadius: "8px",
+    border: "none",
+    fontWeight: "bold",
+    cursor: "pointer",
+  };
+
   return (
     <div>
       {/* Bouton retour si l'utilisateur est dans un mode */}
@@ -26,7 +41,7 @@ function App({ post }) {
         <button
           className="back-btn"
           onClick={() => setMode(null)}
-          style={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}
+          style={backBtnStyle}
         >
           ← Retour
         </button>

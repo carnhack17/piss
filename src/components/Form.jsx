@@ -30,7 +30,7 @@ function Form({ onSubmit }) {
     setOpenCriteria({ ...openCriteria, [field]: !openCriteria[field] });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!name || !phone || !city || !quartier || !budget) {
@@ -39,48 +39,40 @@ function Form({ onSubmit }) {
     }
     for (let key in habits) if (!habits[key]) return alert(`Choisis "${key}" !`);
 
-    // 🔹 Génération du token de suppression
     const deleteToken = uuidv4();
+    const cleanPhone = phone.replace(/\D/g, "");
+    const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+      "Merci pour ta publication ! Pour supprimer ton annonce, clique ici : " +
+      `${deleteToken}` // ici tu ajouteras ton URL publique une fois redeployé
+    )}`;
 
-    // 🔹 Insertion Supabase avec delete_token
-    const { data, error } = await supabase
+    const win = window.open(waLink, "_blank");
+    if (!win) return alert("Merci d'autoriser les popups pour WhatsApp !");
+
+    supabase
       .from("post")
       .insert([
         { name, phone, city, quartier, budget: Number(budget), habits, delete_token: deleteToken },
-      ]);
+      ])
+      .then(({ error }) => {
+        if (error) {
+          console.error(error);
+          alert("Erreur lors de l'enregistrement !");
+          return;
+        }
 
-    if (error) {
-      console.error(error);
-      alert("Erreur lors de l'enregistrement !");
-      return;
-    }
+        onSubmit({ name, phone, city, quartier, budget, habits });
 
-    // 🔹 Construction du lien WhatsApp via variables d'environnement
-    const waBase = import.meta.env.VITE_WHATSAPP_BASE;
-    const appUrl = import.meta.env.VITE_APP_URL;
-    const waUrl = `${waBase}/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-      "Merci pour ta publication ! Pour supprimer ton annonce, clique ici : " + `${appUrl}/delete/${deleteToken}`
-    )}`;
+        setName("");
+        setPhone("");
+        setCity("");
+        setQuartier("");
+        setBudget("");
+        setHabits({ fumeur: "", proprete: "", visites: "", vie_nocturne: "", travail: "" });
 
-    // 🔹 Ouvre WhatsApp
-    window.open(waUrl, "_blank");
-
-    // 🔹 Affiche le toast
-    setToast("✅ Publication réussie !");
-
-    // 🔹 Appel immédiat à onSubmit pour mettre à jour App.jsx
-    onSubmit({ name, phone, city, quartier, budget, habits });
-
-    // 🔹 Reset formulaire
-    setName("");
-    setPhone("");
-    setCity("");
-    setQuartier("");
-    setBudget("");
-    setHabits({ fumeur: "", proprete: "", visites: "", vie_nocturne: "", travail: "" });
-
-    // 🔹 Supprime le toast après 3s
-    setTimeout(() => setToast(""), 3000);
+        setToast("✅ Publication réussie !");
+        setTimeout(() => setToast(""), 3000);
+      });
   };
 
   const renderOptionGroup = (label, field, options) => (
@@ -118,7 +110,23 @@ function Form({ onSubmit }) {
         {renderOptionGroup("Vie nocturne ?", "vie_nocturne", ["Fêtard", "Calme", "Sort souvent"])}
         {renderOptionGroup("Travail ?", "travail", ["Étudiant", "Travailleur"])}
 
-        <button type="submit">Publier</button>
+        {/* 🔹 BOUTON MODIFIÉ */}
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+          <button
+            type="submit"
+            style={{
+              background: "#4caf50",
+              color: "white",
+              padding: "12px 24px",
+              borderRadius: "12px",
+              border: "none",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            Publier
+          </button>
+        </div>
       </form>
 
       {toast && <div className="toast show">{toast}</div>}

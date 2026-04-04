@@ -44,7 +44,7 @@ function Form({ onSubmit }) {
 
     // 🔥 Insertion Supabase avec delete_token
     const { data, error } = await supabase
-      .from("posts")
+      .from("post")
       .insert([
         { name, phone, city, quartier, budget: Number(budget), habits, delete_token: deleteToken },
       ]);

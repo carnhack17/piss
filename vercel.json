@@ -2,6 +2,7 @@
 
 {
   "rewrites": [
-    { "source": "/delete/:token", "destination": "/index.html" }
+    { "source": "/delete/:token", "destination": "/index.html" },
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }

@@ -39,10 +39,10 @@ function Form({ onSubmit }) {
     }
     for (let key in habits) if (!habits[key]) return alert(`Choisis "${key}" !`);
 
-    // 🔥 Génération du token de suppression
+    // 🔹 Génération du token de suppression
     const deleteToken = uuidv4();
 
-    // 🔥 Insertion Supabase avec delete_token
+    // 🔹 Insertion Supabase avec delete_token
     const { data, error } = await supabase
       .from("posts")
       .insert([
@@ -55,19 +55,20 @@ function Form({ onSubmit }) {
       return;
     }
 
-    // 🔥 Génération du lien de suppression
-    const deleteLink = `${import.meta.env.VITE_APP_URL}/delete/${deleteToken}`;
-    const waUrl = `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-      "Merci pour ta publication ! Pour supprimer ton annonce, clique ici : " + deleteLink
+    // 🔹 Construction du lien WhatsApp via variables d'environnement
+    const waBase = import.meta.env.VITE_WHATSAPP_BASE;
+    const appUrl = import.meta.env.VITE_APP_URL;
+    const waUrl = `${waBase}/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+      "Merci pour ta publication ! Pour supprimer ton annonce, clique ici : " + `${appUrl}/delete/${deleteToken}`
     )}`;
 
-    // 🔥 Ouvre WhatsApp
+    // 🔹 Ouvre WhatsApp
     window.open(waUrl, "_blank");
 
-    // 🔥 Affiche le toast
+    // 🔹 Affiche le toast
     setToast("✅ Publication réussie !");
 
-    // 🔹 Appel onSubmit immédiatement pour mettre à jour App.jsx
+    // 🔹 Appel immédiat à onSubmit pour mettre à jour App.jsx
     onSubmit({ name, phone, city, quartier, budget, habits });
 
     // 🔹 Reset formulaire

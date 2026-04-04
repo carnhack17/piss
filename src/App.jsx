@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Form from "./components/Form";
 import HabitsForm from "./components/HabitsForm";
 import MatchList from "./components/MatchList";
-import DeletePost from "./components/DeletePost";
 
 import proposerImg from "./components/images/proposer.jpg";
 import chercherImg from "./components/images/chercher.jpg";
@@ -21,8 +19,19 @@ function App({ posts }) {
     setUser(formData);
   };
 
-  const mainApp = (
+  return (
     <div>
+      {/* Bouton retour si l'utilisateur est dans un mode */}
+      {mode && (
+        <button
+          className="back-btn"
+          onClick={() => setMode(null)}
+          style={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}
+        >
+          ← Retour
+        </button>
+      )}
+
       {!mode && (
         <div className="split-container">
           <div
@@ -69,15 +78,6 @@ function App({ posts }) {
         </div>
       )}
     </div>
-  );
-
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={mainApp} />
-        <Route path="/delete/:token" element={<DeletePost />} />
-      </Routes>
-    </Router>
   );
 }
 

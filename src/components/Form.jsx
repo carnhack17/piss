@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
-import { v4 as uuidv4 } from "uuid"; // Pour le token unique
+import { v4 as uuidv4 } from "uuid";
 
 function Form({ onSubmit }) {
   const [name, setName] = useState("");
@@ -44,7 +44,7 @@ function Form({ onSubmit }) {
 
     // 🔥 Insertion Supabase avec delete_token
     const { data, error } = await supabase
-      .from("post")
+      .from("posts")
       .insert([
         { name, phone, city, quartier, budget: Number(budget), habits, delete_token: deleteToken },
       ]);
@@ -56,47 +56,43 @@ function Form({ onSubmit }) {
     }
 
     // 🔥 Génération du lien de suppression
-    const deleteLink = `https://ton-app.vercel.app/delete/${deleteToken}`;
-
-    // 🔥 Envoi du lien via WhatsApp
+    const deleteLink = `${import.meta.env.VITE_APP_URL}/delete/${deleteToken}`;
     const waUrl = `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(
       "Merci pour ta publication ! Pour supprimer ton annonce, clique ici : " + deleteLink
     )}`;
+
+    // 🔥 Ouvre WhatsApp
     window.open(waUrl, "_blank");
 
+    // 🔥 Affiche le toast
     setToast("✅ Publication réussie !");
-    setTimeout(() => setToast(""), 3000);
 
+    // 🔹 Appel onSubmit immédiatement pour mettre à jour App.jsx
     onSubmit({ name, phone, city, quartier, budget, habits });
 
-    // Reset form
+    // 🔹 Reset formulaire
     setName("");
     setPhone("");
     setCity("");
     setQuartier("");
     setBudget("");
     setHabits({ fumeur: "", proprete: "", visites: "", vie_nocturne: "", travail: "" });
+
+    // 🔹 Supprime le toast après 3s
+    setTimeout(() => setToast(""), 3000);
   };
 
   const renderOptionGroup = (label, field, options) => (
     <div className="criteria-group">
-      <label
-        onClick={() => toggleCriteria(field)}
-        className={openCriteria[field] ? "open" : ""}
-      >
+      <label onClick={() => toggleCriteria(field)} className={openCriteria[field] ? "open" : ""}>
         {label} <span className="arrow">▼</span>
       </label>
-      <div
-        className="options-row"
-        style={{ display: openCriteria[field] ? "flex" : "none" }}
-      >
+      <div className="options-row" style={{ display: openCriteria[field] ? "flex" : "none" }}>
         {options.map((opt) => (
           <button
             type="button"
             key={opt}
-            className={`option-btn ${
-              habits[field] === opt.toLowerCase() ? "active" : ""
-            }`}
+            className={`option-btn ${habits[field] === opt.toLowerCase() ? "active" : ""}`}
             onClick={() => setHabits({ ...habits, [field]: opt.toLowerCase() })}
           >
             {opt}

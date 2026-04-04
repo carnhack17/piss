@@ -8,7 +8,7 @@ function DeletePost() {
   useEffect(() => {
     if (!token) return;
     const deletePost = async () => {
-      const { error } = await supabase.from("posts").delete().eq("delete_token", token);
+      const { error } = await supabase.from("post").delete().eq("delete_token", token);
       if (error) return alert("Impossible de supprimer l'annonce : " + error.message);
       alert("Annonce supprimée !");
       window.location.href = "/";

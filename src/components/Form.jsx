@@ -33,42 +33,41 @@ function Form({ onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ Vérifications basiques
     if (!name || !phone || !city || !quartier || !budget) {
       alert("Remplis tous les champs !");
       return;
     }
     for (let key in habits) if (!habits[key]) return alert(`Choisis "${key}" !`);
 
+    // 🔹 Nettoyage et validation numéro
+    const cleanPhone = phone.replace(/\D/g, "");
+    const phoneRegex = /^[0-9]{8,15}$/;
+    if (!phoneRegex.test(cleanPhone)) {
+      alert("Numéro invalide pour WhatsApp !");
+      return;
+    }
+
     // 🔹 Génération du token de suppression
     const deleteToken = uuidv4();
 
     // 🔹 Construction du lien WhatsApp
-    const cleanPhone = phone.replace(/\D/g, ""); // retire +, espaces, etc.
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-      "Merci pour ta publication ! Pour supprimer ton annonce, clique ici : " +
-      `https://piss-seven.vercel.app/delete/${deleteToken}`
+      `Merci pour ta publication ! Pour supprimer ton annonce, clique ici : ${window.location.origin}/delete/${deleteToken}`
     )}`;
 
-    // 🔹 Essaie d'ouvrir WhatsApp d'abord
+    // 🔹 Essaie d'ouvrir WhatsApp
     const waWindow = window.open(waUrl, "_blank");
     if (!waWindow) {
       alert("Impossible d'ouvrir WhatsApp. L'annonce n'a pas été postée.");
-      return;
+      return; // stoppe l'insertion
     }
 
-    // 🔹 Insertion Supabase uniquement si WhatsApp s'ouvre
+    // 🔹 Insertion Supabase avec delete_token
     const { data, error } = await supabase
       .from("post")
       .insert([
-        {
-          name,
-          phone,
-          city,
-          quartier,
-          budget: Number(budget),
-          habits,
-          delete_token: deleteToken,
-        },
+        { name, phone: cleanPhone, city, quartier, budget: Number(budget), habits, delete_token: deleteToken },
       ]);
 
     if (error) {
@@ -77,10 +76,13 @@ function Form({ onSubmit }) {
       return;
     }
 
+    // 🔹 Appel immédiat à onSubmit pour mettre à jour App.jsx
+    onSubmit({ name, phone: cleanPhone, city, quartier, budget, habits });
+
+    // 🔹 Affiche le toast
     setToast("✅ Publication réussie !");
 
-    onSubmit({ name, phone, city, quartier, budget, habits });
-
+    // 🔹 Reset formulaire
     setName("");
     setPhone("");
     setCity("");
@@ -88,6 +90,7 @@ function Form({ onSubmit }) {
     setBudget("");
     setHabits({ fumeur: "", proprete: "", visites: "", vie_nocturne: "", travail: "" });
 
+    // 🔹 Supprime le toast après 3s
     setTimeout(() => setToast(""), 3000);
   };
 
@@ -126,24 +129,9 @@ function Form({ onSubmit }) {
         {renderOptionGroup("Vie nocturne ?", "vie_nocturne", ["Fêtard", "Calme", "Sort souvent"])}
         {renderOptionGroup("Travail ?", "travail", ["Étudiant", "Travailleur"])}
 
-        <div style={{ display: "flex", justifyContent: "center", width: "100%", marginTop: "20px" }}>
-          <button
-            type="submit"
-            style={{
-              backgroundColor: "#4caf50",
-              color: "white",
-              padding: "12px 24px",
-              borderRadius: "12px",
-              border: "none",
-              fontWeight: "bold",
-              cursor: "pointer",
-              width: "200px",
-              textAlign: "center",
-            }}
-          >
-            Publier
-          </button>
-        </div>
+        <button type="submit" style={{ backgroundColor: "#4caf50", color: "white", display: "block", margin: "20px auto", padding: "12px 20px", borderRadius: "12px", border: "none", fontWeight: "bold" }}>
+          Publier
+        </button>
       </form>
 
       {toast && <div className="toast show">{toast}</div>}

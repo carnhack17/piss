@@ -1,0 +1,7 @@
+
+
+{
+  "rewrites": [
+    { "source": "/delete/:token", "destination": "/index.html" }
+  ]
+}

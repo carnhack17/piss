@@ -1,36 +1,32 @@
 import { useEffect, useState } from "react";
 import TinderCard from "react-tinder-card";
-import { supabase } from "../supabaseClient"; // ton client Supabase
+import { supabase } from "../supabaseClient";
 
 function MatchList({ user }) {
   const [post, setPost] = useState([]);
   const [index, setIndex] = useState(0);
 
-  // 🔍 Récupère les annonces de la base
   useEffect(() => {
     const fetchPost = async () => {
       const { data, error } = await supabase
         .from("post")
         .select("*")
-        .eq("type", "propose"); // récupère uniquement les annonces "propose"
+        .eq("type", "propose");
       if (error) {
         console.log("Erreur Supabase:", error);
         return;
       }
       setPost(data);
     };
-
     fetchPost();
   }, []);
 
-  // 🔍 FILTRE LOCAL
   const filtered = post?.filter(
     (p) =>
       p.city?.toLowerCase().trim() === user.city?.toLowerCase().trim() &&
       Math.abs(p.budget - user.budget) <= 20000
   ) || [];
 
-  // 🧠 SCORE
   const calculateMatch = (post) => {
     let score = 0;
     if (user.habits.fumeur === post.habits?.fumeur) score += 30;
@@ -52,10 +48,10 @@ function MatchList({ user }) {
   const getScoreColor = (score) => (score >= 100 ? "#2ecc71" : score >= 50 ? "#f39c12" : "#e74c3c");
 
   const handleSwipe = (dir) => {
-    if (dir === "right") setIndex(index + 1);
+    if (dir === "right") setIndex(index + 1); // Passer
     if (dir === "left") {
       window.open(`https://wa.me/${current.phone}?text=${encodeURIComponent(message)}`);
-      setIndex(index + 1);
+      setIndex(index + 1); // Contacter
     }
   };
 
@@ -90,13 +86,14 @@ function MatchList({ user }) {
             <span style={styles.habitTag}>👥 {current.habits?.visites}</span>
             <span style={styles.habitTag}>💼 {current.habits?.travail}</span>
           </div>
+
+          {/* 🔹 Indication visuelle du swipe */}
+          <div style={styles.swipeHint}>
+            <span>⬅️ Swipe pour Contacter</span>
+            <span>Swipe pour Passer ➡️</span>
+          </div>
         </div>
       </TinderCard>
-
-      <div style={styles.buttons}>
-        <button style={styles.left} onClick={() => handleSwipe("left")}>⬅️ Contacter</button>
-        <button style={styles.right} onClick={() => handleSwipe("right")}>➡️ Passer</button>
-      </div>
     </div>
   );
 }
@@ -120,12 +117,13 @@ const styles = {
     flexDirection: "column",
     justifyContent: "space-between",
     borderRadius: "20px",
-    padding: "24px",
-    maxWidth: "600px",
+    padding: "32px",
+    maxWidth: "700px",
     width: "90%",
     background: "#e3f2fd",
     boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
     transition: "transform 0.3s",
+    position: "relative",
   },
   scoreContainer: {
     position: "relative",
@@ -157,12 +155,11 @@ const styles = {
     gap: "6px",
   },
   habitTag: { backgroundColor: "#f0f0f0", padding: "6px 12px", borderRadius: "12px" },
-  buttons: {
+  swipeHint: {
     display: "flex",
-    justifyContent: "center",
-    gap: "15px",
-    marginTop: "10px",
+    justifyContent: "space-between",
+    marginTop: "16px",
+    fontSize: "14px",
+    color: "#555",
   },
-  left: { background: "#4caf50", color: "white", padding: "12px 20px", borderRadius: "12px", border: "none", fontWeight: "bold", cursor: "pointer" },
-  right: { background: "#f44336", color: "white", padding: "12px 20px", borderRadius: "12px", border: "none", fontWeight: "bold", cursor: "pointer" },
 };

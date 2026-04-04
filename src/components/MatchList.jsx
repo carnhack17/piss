@@ -24,7 +24,7 @@ function MatchList({ user }) {
   }, []);
 
   // 🔍 FILTRE LOCAL
-  const filtered = posts?.filter(
+  const filtered = post?.filter(
     (p) =>
       p.city?.toLowerCase().trim() === user.city?.toLowerCase().trim() &&
       Math.abs(p.budget - user.budget) <= 20000

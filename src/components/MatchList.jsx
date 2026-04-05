@@ -5,6 +5,7 @@ import { supabase } from "../supabaseClient";
 function MatchList({ user }) {
   const [post, setPost] = useState([]);
   const [index, setIndex] = useState(0);
+  const [swipeColor, setSwipeColor] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -59,6 +60,7 @@ function MatchList({ user }) {
 
   const handleSwipe = (dir) => {
     setIndex((prev) => prev + 1);
+    setSwipeColor(null);
 
     if (dir === "left") {
       window.open(
@@ -74,9 +76,25 @@ function MatchList({ user }) {
       <TinderCard
         key={current.id}
         onSwipe={handleSwipe}
+        onSwipeRequirementFulfilled={(dir) => {
+          if (dir === "left") setSwipeColor("green");
+          if (dir === "right") setSwipeColor("red");
+        }}
+        onSwipeRequirementUnfulfilled={() => setSwipeColor(null)}
         preventSwipe={["up", "down"]}
       >
         <div style={styles.card}>
+          {/* Overlay couleur */}
+          {swipeColor && (
+            <div
+              style={{
+                ...styles.overlay,
+                backgroundColor:
+                  swipeColor === "green" ? "#2ecc71" : "#e74c3c",
+              }}
+            />
+          )}
+
           <div style={styles.scoreContainer}>
             <div
               style={{
@@ -107,7 +125,7 @@ function MatchList({ user }) {
             <span style={styles.habitTag}>💼 {current.habits?.travail}</span>
           </div>
 
-          {/* 👇 Indications swipe */}
+          {/* Indications swipe */}
           <div style={styles.swipeHints}>
             <span style={styles.leftHint}>⬅️ Contacter</span>
             <span style={styles.rightHint}>Passer ➡️</span>
@@ -134,6 +152,7 @@ const styles = {
   },
   card: {
     position: "relative",
+    zIndex: 2,
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -144,7 +163,16 @@ const styles = {
     minHeight: "500px",
     background: "#e3f2fd",
     boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-    transition: "transform 0.3s",
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    opacity: 0.25,
+    borderRadius: "20px",
+    zIndex: 1,
   },
   scoreContainer: {
     position: "relative",

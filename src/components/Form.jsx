@@ -42,10 +42,11 @@ function Form({ onSubmit }) {
 
     // 🔹 Nettoyage et validation numéro
     const cleanPhone = phone.replace(/\D/g, "");
-    const phoneRegex = /^[0-9]{8,15}$/;
+    const phoneRegex = /^[1-9][0-9]{7,14}$/;
+
     if (!phoneRegex.test(cleanPhone)) {
-      alert("Numéro invalide pour WhatsApp !");
-      return;
+    alert("Numéro invalide. Format: indicatif pays + numéro (sans +)");
+    return;
     }
 
     // 🔹 Génération du token de suppression
@@ -118,7 +119,10 @@ function Form({ onSubmit }) {
     <div className="form-container">
       <form onSubmit={handleSubmit}>
         <input placeholder="Nom" value={name} onChange={(e) => setName(e.target.value)} />
-        <input placeholder="Téléphone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <input
+            placeholder="Ex: 22670123456 (sans +) et uniquement numero whatsapp"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)} />
         <input placeholder="Ville" value={city} onChange={(e) => setCity(e.target.value)} />
         <input placeholder="Quartier" value={quartier} onChange={(e) => setQuartier(e.target.value)} />
         <input placeholder="Budget" type="number" value={budget} onChange={(e) => setBudget(e.target.value)} />

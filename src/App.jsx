@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Form from "./components/Form";
 import HabitsForm from "./components/HabitsForm";
 import MatchList from "./components/MatchList";
-import DeletePost from "./components/DeletePost"; // ⚠️ adapte si besoin
+import deletePost from "./components/deletePoste"; // ⚠️ adapte si besoin
 
 import proposerImg from "./components/images/proposer.jpg";
 import chercherImg from "./components/images/chercher.jpg";
@@ -101,7 +101,7 @@ function App({ post }) {
         <Route path="/" element={<Home post={post} />} />
 
         {/* 🔥 LA ROUTE QUI MANQUAIT */}
-        <Route path="/delete/:token" element={<DeletePost />} />
+        <Route path="/delete/:token" element={<deletePost />} />
       </Routes>
     </Router>
   );

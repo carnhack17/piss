@@ -1,36 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import TinderCard from "react-tinder-card";
-import { supabase } from "../supabaseClient"; // ton client Supabase
+import { supabase } from "../supabaseClient";
 
 function MatchList({ user }) {
   const [post, setPost] = useState([]);
   const [index, setIndex] = useState(0);
 
-  // 🔍 Récupère les annonces de la base
   useEffect(() => {
+    let isMounted = true;
+
     const fetchPost = async () => {
       const { data, error } = await supabase
         .from("post")
         .select("*")
-        .eq("type", "propose"); // récupère uniquement les annonces "propose"
-      if (error) {
-        console.log("Erreur Supabase:", error);
-        return;
-      }
-      setPost(data);
+        .eq("type", "propose");
+
+      if (!error && isMounted) setPost(data);
     };
 
     fetchPost();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // 🔍 FILTRE LOCAL
-  const filtered = post?.filter(
-    (p) =>
-      p.city?.toLowerCase().trim() === user.city?.toLowerCase().trim() &&
-      Math.abs(p.budget - user.budget) <= 20000
-  ) || [];
+  const filtered =
+    post?.filter(
+      (p) =>
+        p.city?.toLowerCase().trim() === user.city?.toLowerCase().trim() &&
+        Math.abs(p.budget - user.budget) <= 20000
+    ) || [];
 
-  // 🧠 SCORE
   const calculateMatch = (post) => {
     let score = 0;
     if (user.habits.fumeur === post.habits?.fumeur) score += 30;
@@ -41,21 +42,28 @@ function MatchList({ user }) {
     return score;
   };
 
-  const matches = filtered
-    .map((p) => ({ ...p, score: calculateMatch(p) }))
-    .sort((a, b) => b.score - a.score);
+  const matches = useMemo(
+    () =>
+      filtered
+        .map((p) => ({ ...p, score: calculateMatch(p) }))
+        .sort((a, b) => b.score - a.score),
+    [filtered]
+  );
 
   const current = matches[index];
   if (!current) return <p style={{ color: "white" }}>❌ Aucun résultat trouvé</p>;
 
   const message = `Salut, je suis intéressé par ton annonce à ${current.city}`;
-  const getScoreColor = (score) => (score >= 100 ? "#2ecc71" : score >= 50 ? "#f39c12" : "#e74c3c");
+  const getScoreColor = (score) =>
+    score >= 100 ? "#2ecc71" : score >= 50 ? "#f39c12" : "#e74c3c";
 
   const handleSwipe = (dir) => {
-    if (dir === "right") setIndex(index + 1);
+    setIndex((prev) => prev + 1);
+
     if (dir === "left") {
-      window.open(`https://wa.me/${current.phone}?text=${encodeURIComponent(message)}`);
-      setIndex(index + 1);
+      window.open(
+        `https://wa.me/${current.phone}?text=${encodeURIComponent(message)}`
+      );
     }
   };
 
@@ -63,7 +71,11 @@ function MatchList({ user }) {
     <div style={styles.container}>
       <h2 style={{ color: "white" }}>🔥 Meilleur match</h2>
 
-      <TinderCard key={current.id} onSwipe={handleSwipe} preventSwipe={["up", "down"]}>
+      <TinderCard
+        key={current.id}
+        onSwipe={handleSwipe}
+        preventSwipe={["up", "down"]}
+      >
         <div style={styles.card}>
           <div style={styles.scoreContainer}>
             <div
@@ -79,7 +91,11 @@ function MatchList({ user }) {
           <div style={styles.content}>
             <h3>{current.name}</h3>
             <p>{current.city}</p>
-            {current.quartier && <p style={{ fontSize: "14px", color: "#666" }}>{current.quartier}</p>}
+            {current.quartier && (
+              <p style={{ fontSize: "14px", color: "#666" }}>
+                {current.quartier}
+              </p>
+            )}
             <p>{current.budget.toLocaleString()} FCFA</p>
           </div>
 
@@ -90,13 +106,14 @@ function MatchList({ user }) {
             <span style={styles.habitTag}>👥 {current.habits?.visites}</span>
             <span style={styles.habitTag}>💼 {current.habits?.travail}</span>
           </div>
+
+          {/* 👇 Indications swipe */}
+          <div style={styles.swipeHints}>
+            <span style={styles.leftHint}>⬅️ Contacter</span>
+            <span style={styles.rightHint}>Passer ➡️</span>
+          </div>
         </div>
       </TinderCard>
-
-      <div style={styles.buttons}>
-        <button style={styles.left} onClick={() => handleSwipe("left")}>⬅️ Contacter</button>
-        <button style={styles.right} onClick={() => handleSwipe("right")}>➡️ Passer</button>
-      </div>
     </div>
   );
 }
@@ -116,13 +133,15 @@ const styles = {
     overflowY: "auto",
   },
   card: {
+    position: "relative",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
     borderRadius: "20px",
-    padding: "24px",
-    maxWidth: "600px",
-    width: "90%",
+    padding: "32px",
+    maxWidth: "900px",
+    width: "95%",
+    minHeight: "500px",
     background: "#e3f2fd",
     boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
     transition: "transform 0.3s",
@@ -156,13 +175,21 @@ const styles = {
     flexWrap: "wrap",
     gap: "6px",
   },
-  habitTag: { backgroundColor: "#f0f0f0", padding: "6px 12px", borderRadius: "12px" },
-  buttons: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "15px",
-    marginTop: "10px",
+  habitTag: {
+    backgroundColor: "#f0f0f0",
+    padding: "6px 12px",
+    borderRadius: "12px",
   },
-  left: { background: "#4caf50", color: "white", padding: "12px 20px", borderRadius: "12px", border: "none", fontWeight: "bold", cursor: "pointer" },
-  right: { background: "#f44336", color: "white", padding: "12px 20px", borderRadius: "12px", border: "none", fontWeight: "bold", cursor: "pointer" },
+  swipeHints: {
+    position: "absolute",
+    bottom: "10px",
+    width: "90%",
+    display: "flex",
+    justifyContent: "space-between",
+    fontWeight: "bold",
+    fontSize: "14px",
+    opacity: 0.7,
+  },
+  leftHint: { color: "#2ecc71" },
+  rightHint: { color: "#e74c3c" },
 };

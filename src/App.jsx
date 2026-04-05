@@ -1,12 +1,15 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import Form from "./components/Form";
 import HabitsForm from "./components/HabitsForm";
 import MatchList from "./components/MatchList";
+import DeletePost from "./components/DeletePost"; // ⚠️ adapte si besoin
 
 import proposerImg from "./components/images/proposer.jpg";
 import chercherImg from "./components/images/chercher.jpg";
 
-function App({ post }) {
+function Home({ post }) {
   const [mode, setMode] = useState(null);
   const [user, setUser] = useState(null);
 
@@ -19,7 +22,6 @@ function App({ post }) {
     setUser(formData);
   };
 
-  // 🔹 Style commun pour les boutons Retour
   const backBtnStyle = {
     position: "absolute",
     top: "10px",
@@ -36,13 +38,8 @@ function App({ post }) {
 
   return (
     <div>
-      {/* Bouton retour si l'utilisateur est dans un mode */}
       {mode && (
-        <button
-          className="back-btn"
-          onClick={() => setMode(null)}
-          style={backBtnStyle}
-        >
+        <button onClick={() => setMode(null)} style={backBtnStyle}>
           ← Retour
         </button>
       )}
@@ -93,6 +90,20 @@ function App({ post }) {
         </div>
       )}
     </div>
+  );
+}
+
+function App({ post }) {
+  return (
+    <Router>
+      <Routes>
+        {/* 🔥 TON APP NORMALE */}
+        <Route path="/" element={<Home post={post} />} />
+
+        {/* 🔥 LA ROUTE QUI MANQUAIT */}
+        <Route path="/delete/:token" element={<DeletePost />} />
+      </Routes>
+    </Router>
   );
 }
 
